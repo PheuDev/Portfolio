@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Zone admin — non indexée
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: /sitemap.xml

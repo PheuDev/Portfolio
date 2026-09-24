@@ -1,0 +1,112 @@
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.dashboard-stat {
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.dashboard-stat:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+}
+
+.dashboard-stat__numbers {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.dashboard-stat__visible {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.dashboard-stat__separator {
+  font-size: var(--font-size-lg);
+  color: var(--border-strong);
+}
+
+.dashboard-stat__total {
+  font-size: var(--font-size-lg);
+  color: var(--text-muted);
+}
+
+.dashboard-stat__label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.dashboard-stat__sub {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Actions rapides ── */
+.dashboard-actions__title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-4);
+}
+
+.dashboard-actions__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.dashboard-action {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.dashboard-action:hover {
+  background: var(--accent-dim);
+  border-color: var(--border-accent);
+}
+
+/* ── Liens ── */
+.dashboard-links {
+  margin-top: var(--space-6);
+}
+
+.dashboard-link {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.dashboard-link:hover {
+  color: var(--accent);
+}

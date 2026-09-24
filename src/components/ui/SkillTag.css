@@ -1,0 +1,49 @@
+.skill-tag {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.skill-tag:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  background: var(--bg-card-hover);
+}
+
+.skill-tag__name {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.skill-tag__level {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Indicateur coloré à gauche selon le niveau */
+.skill-tag {
+  border-left-width: 2px;
+}
+
+.skill--mastery    { border-left-color: var(--level-mastery); }
+.skill--good       { border-left-color: var(--level-good); }
+.skill--experience { border-left-color: var(--level-experience); }
+.skill--notions    { border-left-color: var(--level-notions); }
+.skill--learning   { border-left-color: var(--level-learning); }
+
+/* Couleur du nom selon le niveau */
+.skill--mastery    .skill-tag__name { color: var(--text-primary); }
+.skill--good       .skill-tag__name { color: var(--text-primary); }
+.skill--experience .skill-tag__name { color: var(--text-secondary); }
+.skill--notions    .skill-tag__name { color: var(--text-secondary); }
+.skill--learning   .skill-tag__name { color: var(--text-muted); }

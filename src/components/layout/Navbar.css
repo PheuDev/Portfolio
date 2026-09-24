@@ -1,0 +1,491 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--navbar-height);
+  /* Safe area pour les téléphones avec encoche */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    backdrop-filter var(--transition-base);
+  border-bottom: 1px solid transparent;
+}
+
+.navbar--scrolled {
+  background: var(--bg-overlay);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: var(--border);
+}
+
+.navbar__inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Pour pousser le brand à gauche, le reste à droite */
+  gap: var(--space-6);
+}
+
+/* Nouveau conteneur pour la nav desktop et les actions */
+.navbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+
+/* ── Brand ── */
+.navbar__brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Lien accueil autour du nom officiel uniquement */
+.navbar__brand-link {
+  display: flex;
+  text-decoration: none;
+}
+
+.navbar__name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: color var(--transition-fast);
+  letter-spacing: -0.01em;
+}
+
+.navbar__brand-link:hover .navbar__name {
+  color: var(--accent);
+}
+
+/* Signature secondaire "Pheu" — subtile et élégante */
+.navbar__nickname {
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  opacity: 0.75;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 4px var(--accent-glow);
+  transition:
+    opacity var(--transition-fast),
+    text-shadow var(--transition-fast);
+  /* Pas de cursor:pointer — c'est une signature, pas un bouton visible */
+  user-select: none;
+}
+
+.navbar__nickname:hover {
+  opacity: 1;
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ── Surbrillance du nom : reflet qui balaie lentement ──
+   Encapsulé dans @supports pour ne jamais rendre le nom invisible
+   sur un moteur qui ignorerait background-clip: text. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .navbar__name {
+    background-image: linear-gradient(
+      100deg,
+      var(--text-primary) 0%,
+      var(--text-primary) 40%,
+      var(--accent-hover) 50%,
+      var(--text-primary) 60%,
+      var(--text-primary) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: navbar-sheen 7s ease-in-out infinite;
+  }
+
+  .navbar__brand-link:hover .navbar__name {
+    animation-duration: 2.4s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navbar__name {
+      animation: none;
+      -webkit-text-fill-color: currentColor;
+      background-image: none;
+    }
+  }
+}
+
+@keyframes navbar-sheen {
+  0%,
+  100% { background-position: 150% 0; }
+  50%  { background-position: -50% 0; }
+}
+
+/* Animation d'entrée pour les liens du menu mobile :
+   chaque option « se saisit » l'une après l'autre, mais vite. */
+.navbar__mobile ul li {
+  opacity: 0;
+  transform: translateY(14px);
+  /* pointer-events désactivés tant que le menu est fermé / en train d'animer */
+  pointer-events: none;
+  transition:
+    opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.navbar__mobile--open ul li {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Délais en cascade — 40 ms par option */
+.navbar__mobile--open ul li:nth-child(1) { transition-delay:  40ms; }
+.navbar__mobile--open ul li:nth-child(2) { transition-delay:  80ms; }
+.navbar__mobile--open ul li:nth-child(3) { transition-delay: 120ms; }
+.navbar__mobile--open ul li:nth-child(4) { transition-delay: 160ms; }
+.navbar__mobile--open ul li:nth-child(5) { transition-delay: 200ms; }
+.navbar__mobile--open ul li:nth-child(6) { transition-delay: 240ms; }
+.navbar__mobile--open ul li:nth-child(7) { transition-delay: 280ms; }
+.navbar__mobile--open ul li:nth-child(8) { transition-delay: 320ms; }
+
+/* L'heure apparaît après les options... */
+.navbar__mobile .datetime-display {
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition:
+    opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.navbar__mobile--open .datetime-display {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 260ms;
+}
+
+/* ... puis la silhouette entre en scène */
+.navbar__mobile .navbar__mobile-progress {
+  opacity: 0;
+  transition: opacity 260ms ease-out;
+}
+
+.navbar__mobile--open .navbar__mobile-progress {
+  opacity: 1;
+  transition-delay: 340ms;
+}
+
+
+/* ── Navigation links ── */
+.navbar__nav {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+}
+
+.navbar__link {
+  position: relative;
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+/* Soulignement animé — seul indicateur d'état (hover + actif) */
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 4px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--transition-base) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.navbar__link:hover {
+  color: var(--text-primary);
+}
+
+.navbar__link:hover::after,
+.navbar__link--active::after {
+  transform: scaleX(1);
+}
+
+.navbar__link--active {
+  color: var(--text-primary);
+}
+
+/* ── Actions ── */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.navbar__actions .datetime-display {
+  /* Par défaut, masqué sur mobile, visible sur desktop */
+  display: none;
+}
+
+/* ── Burger mobile ── */
+.navbar__burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.navbar__burger:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+}
+
+.navbar__burger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.navbar__burger span {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: transform var(--transition-base), opacity var(--transition-base);
+  transform-origin: center;
+}
+
+.navbar__burger--open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.navbar__burger--open span:nth-child(2) { opacity: 0; }
+.navbar__burger--open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── Menu mobile ── */
+.navbar__mobile {
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  /* Safe area pour les téléphones avec barre de navigation système */
+  padding: var(--space-4) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  /* Scroll snap pour éviter les débordements sur petits écrans */
+  overscroll-behavior: contain;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform var(--transition-base),
+    opacity var(--transition-base),
+    visibility 0s linear var(--transition-base);
+}
+
+.navbar__mobile nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.navbar__mobile--open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    transform var(--transition-base),
+    opacity var(--transition-base),
+    visibility 0s;
+}
+
+/* ── Silhouette qui avance vers un but ── */
+.navbar__mobile-progress {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 64px;
+  margin: auto auto 0; /* poussée vers le bas : utilise l'espace libre */
+  flex-shrink: 0;
+}
+
+/* Ligne de sol en pointillés */
+.navbar__mobile-progress::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--border-strong) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* Le marcheur — silhouette masquée, teintée par l'accent du thème */
+.navbar__mobile-walker {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 18px;
+  height: 30px;
+  background-color: var(--accent);
+  opacity: 0.55;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cg%20fill='none'%20stroke='%23000'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='14.4'%20cy='4.2'%20r='2.2'%20fill='%23000'%20stroke='none'/%3E%3Cpath%20d='M13.6%207.6%2012.6%2013.4'/%3E%3Cpath%20d='M13.6%208.6%2016.8%2011.6%2017.6%2014.6'/%3E%3Cpath%20d='M13.6%209.4%2010.4%2012%209%2014.8'/%3E%3Cpath%20d='M12.6%2013.4%2014.6%2017%2015.6%2020.6'/%3E%3Cpath%20d='M12.6%2013.4%209.8%2016.6%208.4%2020.6'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cg%20fill='none'%20stroke='%23000'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='14.4'%20cy='4.2'%20r='2.2'%20fill='%23000'%20stroke='none'/%3E%3Cpath%20d='M13.6%207.6%2012.6%2013.4'/%3E%3Cpath%20d='M13.6%208.6%2016.8%2011.6%2017.6%2014.6'/%3E%3Cpath%20d='M13.6%209.4%2010.4%2012%209%2014.8'/%3E%3Cpath%20d='M12.6%2013.4%2014.6%2017%2015.6%2020.6'/%3E%3Cpath%20d='M12.6%2013.4%209.8%2016.6%208.4%2020.6'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  animation:
+    navbar-walk 6s linear infinite,
+    navbar-bob 550ms ease-in-out infinite alternate;
+}
+
+/* Le but à atteindre */
+.navbar__mobile-goal {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  height: 36px;
+  border-radius: 2px;
+  background: linear-gradient(to top, var(--accent), transparent);
+}
+
+.navbar__mobile-goal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 10px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 68% 50%, 100% 100%, 0 100%);
+  animation: navbar-goal-pulse 2s ease-in-out infinite;
+}
+
+@keyframes navbar-walk {
+  from { left: 0; }
+  to   { left: calc(100% - 18px); }
+}
+
+@keyframes navbar-bob {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-2px); }
+}
+
+@keyframes navbar-goal-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__mobile-walker {
+    animation: none;
+  }
+  .navbar__mobile-goal::before {
+    animation: none;
+  }
+}
+
+.navbar__mobile ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+}
+
+.navbar__mobile-link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.navbar__mobile-link:hover,
+.navbar__mobile-link--active {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+/* Overlay */
+.navbar__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive adjustments */
+
+/* Date et heure dans la barre : seulement quand il y a la place */
+@media (min-width: 1025px) {
+  .navbar__actions .datetime-display {
+    display: flex;
+  }
+}
+
+@media (max-width: 1024px) {
+  .navbar__actions .datetime-display {
+    display: none;
+  }
+}
+
+/* Alignement strict des breakpoints : même valeur pour cacher la nav
+   desktop et afficher le burger. 900px est la limite commune. */
+@media (min-width: 901px) {
+  /* Menu plein écran hors de l'écran quand ≥ 901px */
+  .navbar__mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar__nav { display: none; }
+  .navbar__burger { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .navbar__name {
+    font-size: var(--font-size-sm);
+  }
+  .navbar__nickname {
+    font-size: var(--font-size-xs);
+  }
+}

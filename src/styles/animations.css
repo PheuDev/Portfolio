@@ -1,0 +1,171 @@
+/* ============================================================
+   ANIMATIONS — Transitions et micro-interactions
+   Toutes les animations sont désactivées si l'utilisateur
+   a activé prefers-reduced-motion.
+   ============================================================ */
+
+/* ── Keyframes ────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-accent {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Classes utilitaires d'animation ─────────────────────── */
+
+.animate-fade-in {
+  animation: fadeIn 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+}
+
+.animate-scale-in {
+  animation: scaleIn 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Délais en cascade — plus espacés pour laisser chaque élément
+   s'installer avant le suivant */
+.animate-delay-1 { animation-delay: 120ms; }
+.animate-delay-2 { animation-delay: 260ms; }
+.animate-delay-3 { animation-delay: 400ms; }
+.animate-delay-4 { animation-delay: 540ms; }
+.animate-delay-5 { animation-delay: 660ms; }
+.animate-delay-6 { animation-delay: 780ms; }
+.animate-delay-7 { animation-delay: 900ms; }
+.animate-delay-8 { animation-delay: 1020ms; }
+
+/* Squelette de chargement */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-card-hover) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Classe d'apparition au scroll (Intersection Observer) ── */
+
+.reveal {
+  /* État initial — ajustable via data-reveal / --reveal-delay */
+  --reveal-x: 0;
+  --reveal-y: 48px;        /* était 34px — décalage plus grand, effet plus lisible */
+  --reveal-scale: 1;
+  --reveal-blur: 8px;      /* était 6px */
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+  transform:
+    translate3d(var(--reveal-x), var(--reveal-y), 0)
+    scale(var(--reveal-scale));
+  transition:
+    opacity var(--transition-reveal),
+    transform var(--transition-reveal),
+    filter var(--transition-reveal);
+  transition-delay: var(--reveal-delay, 80ms);
+  will-change: opacity, transform;
+}
+
+.reveal.visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+  /* Libère la couche GPU une fois l'animation terminée */
+  will-change: auto;
+}
+
+/* Variantes d'apparition au scroll */
+.reveal[data-reveal="fade"]  { --reveal-y: 0; --reveal-blur: 12px; }
+.reveal[data-reveal="scale"] { --reveal-y: 20px; --reveal-scale: 0.92; }
+.reveal[data-reveal="left"]  { --reveal-x: -56px; --reveal-y: 0; --reveal-blur: 6px; }
+.reveal[data-reveal="right"] { --reveal-x: 56px; --reveal-y: 0; --reveal-blur: 6px; }
+
+/* Transition d'entrée des pages (wrapper keyed par chemin dans Layout) */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ── Désactivation pour prefers-reduced-motion ────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+
+  /* Curseur typewriter figé — le hook retourne déjà le premier mot
+     statiquement, mais on s'assure que le curseur ne clignote pas */
+  .hero__cursor {
+    animation: none !important;
+  }
+}
