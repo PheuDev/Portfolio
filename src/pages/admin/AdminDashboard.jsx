@@ -2,12 +2,26 @@
    AdminDashboard — Vue d'ensemble du contenu
    ============================================================ */
 
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '@/context/DataContext'
 import './AdminDashboard.css'
 
 export function AdminDashboard() {
-  const { rawData } = useData()
+  const { rawData, isSharedStorageEnabled, isSaving, migrateLocalOverrides } = useData()
+  const [migrationMessage, setMigrationMessage] = useState('')
+
+  async function importLocalChanges() {
+    setMigrationMessage('Import en cours…')
+    try {
+      const domains = await migrateLocalOverrides()
+      setMigrationMessage(domains.length > 0
+        ? `Domaines importés : ${domains.join(', ')}.`
+        : 'Aucune modification locale à importer. Les données déjà partagées sont conservées.')
+    } catch {
+      setMigrationMessage('Import échoué. Consulte le message de synchronisation ci-dessus.')
+    }
+  }
 
   const stats = [
     {
@@ -93,6 +107,23 @@ export function AdminDashboard() {
           </Link>
         </div>
       </div>
+
+      {isSharedStorageEnabled && (
+        <div className="admin-card dashboard-actions">
+          <h2 className="dashboard-actions__title">Données de cet appareil</h2>
+          <p className="admin-page-subtitle">
+            Importe les anciennes modifications locales uniquement pour les domaines absents de Supabase.
+          </p>
+          <button
+            className="admin-action-btn"
+            onClick={importLocalChanges}
+            disabled={isSaving}
+          >
+            Importer les modifications locales
+          </button>
+          {migrationMessage && <p className="admin-page-subtitle" role="status">{migrationMessage}</p>}
+        </div>
+      )}
 
       {/* ── Liens ── */}
       <div className="dashboard-links">

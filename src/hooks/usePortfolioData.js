@@ -1,49 +1,23 @@
 /* ============================================================
    usePortfolioData — Fusion données de base + modifications admin
    
-   Stratégie :
-   - Les données de base viennent des fichiers src/data/*.js
-   - Les modifications faites via l'admin sont stockées dans localStorage
-   - Au chargement, localStorage écrase les données de base si présent
-   - En admin, on expose aussi des fonctions de mise à jour
+  Les fichiers src/data/*.js restent la base. Supabase devient la
+  source partagée quand il est configuré ; sinon, localStorage sert
+  toujours de stockage local pour le développement.
    ============================================================ */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import {
+  loadPortfolioData,
+  migrateLocalOverrides as migrateLocalData,
+  savePortfolioDomain,
+  STORAGE_KEYS,
+} from '@/data/portfolioRepository'
+import { isSupabaseConfigured } from '@/lib/supabase'
 
-// Clés localStorage par domaine
-export const STORAGE_KEYS = {
-  identity:     'pheu_data_identity',
-  projects:     'pheu_data_projects',
-  skills:       'pheu_data_skills',
-  services:     'pheu_data_services',
-  credentials:  'pheu_data_credentials',
-  experience:   'pheu_data_experience',
-  explorations: 'pheu_data_explorations',
-}
+export { STORAGE_KEYS }
 
-/* Lit une clé localStorage et parse le JSON, retourne null si absent/invalide */
-function readStorage(key) {
-  try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return null
-    return JSON.parse(raw)
-  } catch {
-    return null
-  }
-}
-
-/* Écrit dans localStorage */
-function writeStorage(key, value) {
-  localStorage.setItem(key, JSON.stringify(value))
-}
-
-/* Fusionne : localStorage prend la priorité sur les données de base */
-function merge(baseData, storageKey) {
-  const stored = readStorage(storageKey)
-  return stored !== null ? stored : baseData
-}
-
-export function usePortfolioData(baseData) {
+export function usePortfolioData(sourceData) {
   const {
     identity:     baseIdentity,
     projects:     baseProjects,
@@ -52,23 +26,65 @@ export function usePortfolioData(baseData) {
     credentials:  baseCredentials,
     experience:   baseExperience,
     explorations: baseExplorations,
-  } = baseData
+  } = sourceData
 
-  // État initialisé avec la fusion base + localStorage
-  const [data, setData] = useState(() => ({
-    identity:     merge(baseIdentity,     STORAGE_KEYS.identity),
-    projects:     merge(baseProjects,     STORAGE_KEYS.projects),
-    skills:       merge(baseSkills,       STORAGE_KEYS.skills),
-    services:     merge(baseServices,     STORAGE_KEYS.services),
-    credentials:  merge(baseCredentials,  STORAGE_KEYS.credentials),
-    experience:   merge(baseExperience,   STORAGE_KEYS.experience),
-    explorations: merge(baseExplorations, STORAGE_KEYS.explorations),
-  }))
+  const baseData = useRef({
+    identity: baseIdentity,
+    projects: baseProjects,
+    skills: baseSkills,
+    services: baseServices,
+    credentials: baseCredentials,
+    experience: baseExperience,
+    explorations: baseExplorations,
+  }).current
+  const [data, setData] = useState(baseData)
+  const [isDataLoading, setIsDataLoading] = useState(true)
+  const [pendingWrites, setPendingWrites] = useState(0)
+  const [persistenceError, setPersistenceError] = useState(null)
+  const persistedData = useRef(baseData)
+  const domainVersions = useRef({})
+  const persistenceQueue = useRef(Promise.resolve())
 
-  /* Met à jour un domaine entier et persiste dans localStorage */
+  useEffect(() => {
+    let active = true
+    loadPortfolioData(baseData)
+      .then(loadedData => {
+        if (!active) return
+        persistedData.current = loadedData
+        setData(loadedData)
+      })
+      .catch(error => {
+        if (active) setPersistenceError(`Chargement impossible : ${error.message}`)
+      })
+      .finally(() => {
+        if (active) setIsDataLoading(false)
+      })
+
+    return () => { active = false }
+  }, [baseData])
+
+  /* Met à jour un domaine et le persiste dans le dépôt actif */
   const updateDomain = useCallback((domain, newValue) => {
-    writeStorage(STORAGE_KEYS[domain], newValue)
     setData(prev => ({ ...prev, [domain]: newValue }))
+    setPersistenceError(null)
+    setPendingWrites(count => count + 1)
+
+    const version = (domainVersions.current[domain] || 0) + 1
+    domainVersions.current[domain] = version
+    const operation = persistenceQueue.current.then(() => savePortfolioDomain(domain, newValue))
+    persistenceQueue.current = operation
+      .then(() => {
+        persistedData.current = { ...persistedData.current, [domain]: newValue }
+      })
+      .catch(error => {
+        setPersistenceError(`Sauvegarde impossible : ${error.message}`)
+        if (domainVersions.current[domain] === version) {
+          setData(prev => ({ ...prev, [domain]: persistedData.current[domain] }))
+        }
+      })
+      .finally(() => setPendingWrites(count => Math.max(0, count - 1)))
+
+    return operation.catch(() => false)
   }, [])
 
   /* Met à jour un seul objet identity (cas particulier, ce n'est pas un tableau) */
@@ -107,7 +123,6 @@ export function usePortfolioData(baseData) {
 
   /* Réinitialise un domaine aux données de base */
   const resetDomain = useCallback((domain) => {
-    localStorage.removeItem(STORAGE_KEYS[domain])
     const base = {
       identity:     baseIdentity,
       projects:     baseProjects,
@@ -117,13 +132,12 @@ export function usePortfolioData(baseData) {
       experience:   baseExperience,
       explorations: baseExplorations,
     }
-    setData(prev => ({ ...prev, [domain]: base[domain] }))
-  }, [baseIdentity, baseProjects, baseSkills, baseServices, baseCredentials, baseExperience, baseExplorations])
+    updateDomain(domain, base[domain])
+  }, [baseIdentity, baseProjects, baseSkills, baseServices, baseCredentials, baseExperience, baseExplorations, updateDomain])
 
   /* Réinitialise TOUT aux données de base */
   const resetAll = useCallback(() => {
-    Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key))
-    setData({
+    const base = {
       identity:     baseIdentity,
       projects:     baseProjects,
       skills:       baseSkills,
@@ -131,11 +145,35 @@ export function usePortfolioData(baseData) {
       credentials:  baseCredentials,
       experience:   baseExperience,
       explorations: baseExplorations,
-    })
-  }, [baseIdentity, baseProjects, baseSkills, baseServices, baseCredentials, baseExperience, baseExplorations])
+    }
+    Object.entries(base).forEach(([domain, value]) => updateDomain(domain, value))
+  }, [baseIdentity, baseProjects, baseSkills, baseServices, baseCredentials, baseExperience, baseExplorations, updateDomain])
+
+  const migrateLocalOverrides = useCallback(async () => {
+    setPersistenceError(null)
+    setPendingWrites(count => count + 1)
+    try {
+      const importedRows = await migrateLocalData()
+      const importedData = Object.fromEntries(importedRows.map(row => [row.domain, row.content]))
+      if (importedRows.length > 0) {
+        persistedData.current = { ...persistedData.current, ...importedData }
+        setData(prev => ({ ...prev, ...importedData }))
+      }
+      return importedRows.map(row => row.domain)
+    } catch (error) {
+      setPersistenceError(`Import impossible : ${error.message}`)
+      throw error
+    } finally {
+      setPendingWrites(count => Math.max(0, count - 1))
+    }
+  }, [])
 
   return {
     data,
+    isDataLoading,
+    isSaving: pendingWrites > 0,
+    persistenceError,
+    isSharedStorageEnabled: isSupabaseConfigured,
     updateIdentity,
     updateDomain,
     addItem,
@@ -144,5 +182,6 @@ export function usePortfolioData(baseData) {
     toggleVisibility,
     resetDomain,
     resetAll,
+    migrateLocalOverrides,
   }
 }

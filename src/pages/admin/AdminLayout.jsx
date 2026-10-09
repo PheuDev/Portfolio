@@ -34,7 +34,7 @@ const ADMIN_NAV = [
 
 export function AdminLayout() {
   const { logout } = useAdmin()
-  const { identity } = useData()
+  const { identity, isSaving, isSharedStorageEnabled, persistenceError } = useData()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -115,6 +115,17 @@ export function AdminLayout() {
         </header>
 
         <div className="admin-content">
+          {persistenceError ? (
+            <p className="admin-persistence-status admin-persistence-status--error" role="alert">
+              {persistenceError}
+            </p>
+          ) : isSaving ? (
+            <p className="admin-persistence-status" role="status">Synchronisation des modifications…</p>
+          ) : !isSharedStorageEnabled ? (
+            <p className="admin-persistence-status" role="status">
+              Stockage local : les modifications restent sur cet appareil.
+            </p>
+          ) : null}
           <Outlet />
         </div>
       </div>

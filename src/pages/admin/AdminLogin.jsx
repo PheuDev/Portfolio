@@ -10,8 +10,9 @@ import './AdminLogin.css'
 
 export function AdminLogin() {
   const [code, setCode] = useState('')
-  const [lockoutSeconds, setLockoutSeconds] = useState(0)
-  const { login, isLoading, error, getLockoutRemaining } = useAdmin()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const { login, isLoading, error, isConfigured, isLocalAdmin } = useAdmin()
   const inputRef = useRef(null)
 
   // Focus automatique
@@ -19,32 +20,15 @@ export function AdminLogin() {
     inputRef.current?.focus()
   }, [])
 
-  // Décompte du blocage
-  useEffect(() => {
-    const remaining = getLockoutRemaining()
-    if (remaining > 0) {
-      setLockoutSeconds(remaining)
-      const timer = setInterval(() => {
-        const r = getLockoutRemaining()
-        setLockoutSeconds(r)
-        if (r <= 0) {
-          setLockoutSeconds(0)
-          clearInterval(timer)
-        }
-      }, 1000)
-      return () => clearInterval(timer)
-    }
-  }, [error, getLockoutRemaining])
-
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!code.trim() || isLoading || lockoutSeconds > 0) return
-    await login(code)
-    // Si succès, AdminRoute re-rend automatiquement les children
-    // (isAuthenticated devient true dans le context partagé)
+    if (isLoading) return
+    if (isLocalAdmin) {
+      if (code) await login({ code })
+      return
+    }
+    if (email.trim() && password) await login({ email, password })
   }
-
-  const isLocked = lockoutSeconds > 0
 
   return (
     <div className="admin-login">
@@ -55,40 +39,81 @@ export function AdminLogin() {
           <span className="admin-login__pheu">Pheu</span>
         </div>
 
-        <form className="admin-login__form" onSubmit={handleSubmit} noValidate>
-          <div className="admin-login__field">
-            <input
-              ref={inputRef}
-              type="password"
-              className={`admin-login__input ${error ? 'admin-login__input--error' : ''}`}
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              placeholder="Code d'accès"
-              autoComplete="new-password"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
-              disabled={isLocked || isLoading}
-              aria-label="Code d'accès"
-              aria-describedby={error ? 'login-error' : undefined}
-            />
-          </div>
+        {!isConfigured && (
+          <p className="admin-login__notice" role="status">
+            Configure Supabase pour activer l’accès administrateur.
+          </p>
+        )}
 
-          {(error || isLocked) && (
+        <form className="admin-login__form" onSubmit={handleSubmit} noValidate>
+          {isLocalAdmin ? (
+            <div className="admin-login__field">
+              <input
+                ref={inputRef}
+                type="password"
+                className={`admin-login__input ${error ? 'admin-login__input--error' : ''}`}
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                placeholder="Code local"
+                autoComplete="current-password"
+                disabled={isLoading}
+                aria-label="Code d’accès local"
+                aria-describedby={error ? 'login-error' : undefined}
+                required
+              />
+            </div>
+          ) : (
+            <>
+              <div className="admin-login__field">
+                <input
+                  ref={inputRef}
+                  type="email"
+                  className={`admin-login__input ${error ? 'admin-login__input--error' : ''}`}
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Adresse e-mail"
+                  autoComplete="username"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  disabled={!isConfigured || isLoading}
+                  aria-label="Adresse e-mail"
+                  aria-describedby={error ? 'login-error' : undefined}
+                  required
+                />
+              </div>
+              <div className="admin-login__field">
+                <input
+                  type="password"
+                  className={`admin-login__input ${error ? 'admin-login__input--error' : ''}`}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Mot de passe"
+                  autoComplete="current-password"
+                  disabled={!isConfigured || isLoading}
+                  aria-label="Mot de passe"
+                  aria-describedby={error ? 'login-error' : undefined}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {error && (
             <p
               className="admin-login__error"
               id="login-error"
               role="alert"
               aria-live="polite"
             >
-              {isLocked ? `Accès temporairement suspendu — ${lockoutSeconds}s` : error}
+              {error}
             </p>
           )}
 
           <button
             type="submit"
             className="admin-login__btn"
-            disabled={!code.trim() || isLocked || isLoading}
+            disabled={!isConfigured || (isLocalAdmin ? !code : !email.trim() || !password) || isLoading}
           >
             {isLoading ? 'Vérification…' : 'Accéder'}
           </button>

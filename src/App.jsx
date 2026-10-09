@@ -10,6 +10,7 @@
    ============================================================ */
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useData } from '@/context/DataContext'
 
 // Contextes
 import { DataProvider }           from '@/context/DataContext'
@@ -49,6 +50,24 @@ import { NotFound } from '@/pages/NotFound'
 /* Composant racine qui porte le thème et les providers */
 function AppContent() {
   const { theme, toggleTheme } = useTheme()
+  const { isDataLoading } = useData()
+
+  if (isDataLoading) {
+    return (
+      <div
+        role="status"
+        style={{
+          minHeight: '100vh',
+          display: 'grid',
+          placeItems: 'center',
+          background: 'var(--bg-primary)',
+          color: 'var(--text-muted)',
+        }}
+      >
+        Chargement du portfolio…
+      </div>
+    )
+  }
 
   return (
     <BrowserRouter>

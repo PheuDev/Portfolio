@@ -26,6 +26,14 @@
   text-align: center;
 }
 
+.admin-login__notice {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  text-align: center;
+}
+
 .admin-login__pheu {
   font-size: var(--font-size-3xl);
   font-style: italic;
@@ -58,6 +66,10 @@
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   outline: none;
   letter-spacing: 0.15em; /* Espacement discret pour les mots de passe */
+}
+
+.admin-login__input[type='email'] {
+  letter-spacing: 0;
 }
 
 .admin-login__input::placeholder {
@@ -144,4 +156,12 @@
 
 .admin-login__cancel:hover {
   color: var(--text-secondary);
+}
+
+.admin-auth-status {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  background: var(--bg-primary);
 }

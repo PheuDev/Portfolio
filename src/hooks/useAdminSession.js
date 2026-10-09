@@ -1,145 +1,140 @@
 /* ============================================================
-   useAdminSession — Gestion de la session administrateur
-   - Vérifie si une session valide existe dans sessionStorage
-   - Expose login / logout
-   - Gère la protection anti-brute-force (tentatives + blocage)
+  useAdminSession — Gestion de la session administrateur
+  - Vérifie la session Supabase et le rôle admin
+  - Autorise un code local uniquement en développement
    ============================================================ */
 
-import { useState, useCallback } from 'react'
-import {
-  ACCESS_CODE_HASH,
-  SESSION_DURATION_MS,
-  SESSION_KEY,
-  MAX_ATTEMPTS,
-  LOCKOUT_DURATION_MS,
-  ATTEMPTS_KEY,
-} from '@/config/auth'
+import { useState, useCallback, useEffect } from 'react'
+import { hasPartialSupabaseConfig, isSupabaseConfigured, supabase } from '@/lib/supabase'
 
-/* Hash SHA-256 via Web Crypto API (disponible nativement dans tous les navigateurs modernes) */
-async function sha256(text) {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(text)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+const LOCAL_ADMIN_SESSION_KEY = 'pheu_local_admin_session'
+const localAdminCode = !isSupabaseConfigured && import.meta.env.DEV
+  ? import.meta.env.VITE_LOCAL_ADMIN_CODE?.trim()
+  : ''
+const isLocalAdminEnabled = Boolean(localAdminCode)
+
+function isAdminSession(session) {
+  return session?.user?.app_metadata?.role === 'admin'
 }
 
-/* Lit l'état des tentatives depuis sessionStorage */
-function getAttemptsState() {
+function hasLocalAdminSession() {
   try {
-    const raw = sessionStorage.getItem(ATTEMPTS_KEY)
-    if (!raw) return { count: 0, lockedUntil: null }
-    return JSON.parse(raw)
-  } catch {
-    return { count: 0, lockedUntil: null }
-  }
-}
-
-/* Sauvegarde l'état des tentatives */
-function saveAttemptsState(state) {
-  sessionStorage.setItem(ATTEMPTS_KEY, JSON.stringify(state))
-}
-
-/* Vérifie si une session active existe et n'est pas expirée */
-function checkExistingSession() {
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY)
-    if (!raw) return false
-    const session = JSON.parse(raw)
-    if (!session.token || !session.createdAt) return false
-    const age = Date.now() - session.createdAt
-    return age < SESSION_DURATION_MS
+    return sessionStorage.getItem(LOCAL_ADMIN_SESSION_KEY) === 'true'
   } catch {
     return false
   }
 }
 
 export function useAdminSession() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => checkExistingSession())
+  const [isAuthenticated, setIsAuthenticated] = useState(() =>
+    isLocalAdminEnabled && hasLocalAdminSession()
+  )
+  const [isCheckingSession, setIsCheckingSession] = useState(isSupabaseConfigured)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  /* Retourne le nombre de secondes restantes de blocage, ou 0 si pas bloqué */
-  function getLockoutRemaining() {
-    const state = getAttemptsState()
-    if (!state.lockedUntil) return 0
-    const remaining = state.lockedUntil - Date.now()
-    return remaining > 0 ? Math.ceil(remaining / 1000) : 0
-  }
+  useEffect(() => {
+    if (!supabase) return undefined
 
-  /* Tentative de connexion */
-  const login = useCallback(async (code) => {
+    let active = true
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(isAdminSession(session))
+      setIsCheckingSession(false)
+    })
+
+    supabase.auth.getSession().then(({ data, error: sessionError }) => {
+      if (!active) return
+      setIsAuthenticated(isAdminSession(data.session))
+      if (sessionError) setError('Impossible de vérifier la session. Réessaie.')
+      setIsCheckingSession(false)
+    }).catch(() => {
+      if (!active) return
+      setError('Impossible de vérifier la session. Réessaie.')
+      setIsCheckingSession(false)
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const login = useCallback(async ({ email, password, code }) => {
     setError(null)
 
-    // Vérification du blocage
-    const lockout = getLockoutRemaining()
-    if (lockout > 0) {
-      setError(`Trop de tentatives. Réessaie dans ${lockout} secondes.`)
+    if (isLocalAdminEnabled) {
+      if (code !== localAdminCode) {
+        setError('Code local incorrect.')
+        return false
+      }
+      try {
+        sessionStorage.setItem(LOCAL_ADMIN_SESSION_KEY, 'true')
+        setIsAuthenticated(true)
+        return true
+      } catch {
+        setError('Impossible de créer la session locale dans ce navigateur.')
+        return false
+      }
+    }
+
+    if (!supabase) {
+      setError(hasPartialSupabaseConfig
+        ? 'Configuration Supabase incomplète. Vérifie les variables d’environnement.'
+        : 'Connexion admin indisponible : configure Supabase pour activer cet accès.')
       return false
     }
 
     setIsLoading(true)
-
     try {
-      const inputHash = await sha256(code.trim())
-      const isValid = inputHash === ACCESS_CODE_HASH
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
 
-      if (isValid) {
-        // Réinitialise les tentatives
-        sessionStorage.removeItem(ATTEMPTS_KEY)
-
-        // Crée la session avec un token aléatoire
-        const session = {
-          token: crypto.randomUUID(),
-          createdAt: Date.now(),
-        }
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
-        setIsAuthenticated(true)
-        setIsLoading(false)
-        return true
-      } else {
-        // Incrémente les tentatives
-        const state = getAttemptsState()
-        const newCount = state.count + 1
-        const newState = {
-          count: newCount,
-          lockedUntil: newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_DURATION_MS : null,
-        }
-        saveAttemptsState(newState)
-
-        const remaining = MAX_ATTEMPTS - newCount
-        if (newState.lockedUntil) {
-          setError(`Trop de tentatives. Accès bloqué 5 minutes.`)
-        } else {
-          setError(
-            remaining > 0
-              ? `Code incorrect. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`
-              : `Code incorrect.`
-          )
-        }
-        setIsLoading(false)
+      if (authError) {
+        setError(authError.message === 'Invalid login credentials'
+          ? 'Adresse e-mail ou mot de passe incorrect.'
+          : 'Connexion impossible. Vérifie tes identifiants et réessaie.')
         return false
       }
-    } catch {
-      setError('Une erreur est survenue. Réessaie.')
-      setIsLoading(false)
+
+      if (!isAdminSession(data.session)) {
+        await supabase.auth.signOut()
+        setError('Ce compte n’a pas les droits administrateur.')
+        return false
+      }
+
+      setIsAuthenticated(true)
+      return true
+    } catch (authError) {
+      setError('Connexion impossible. Vérifie ta connexion internet et réessaie.')
       return false
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
-  /* Déconnexion */
   const logout = useCallback(() => {
-    sessionStorage.removeItem(SESSION_KEY)
     setIsAuthenticated(false)
     setError(null)
+    if (isLocalAdminEnabled) {
+      try {
+        sessionStorage.removeItem(LOCAL_ADMIN_SESSION_KEY)
+      } catch {
+        setError('Impossible de supprimer la session locale dans ce navigateur.')
+      }
+    }
+    return supabase?.auth.signOut()
   }, [])
 
   return {
     isAuthenticated,
+    isCheckingSession,
     isLoading,
     error,
     login,
     logout,
-    getLockoutRemaining,
+    isConfigured: isSupabaseConfigured || isLocalAdminEnabled,
+    isLocalAdmin: isLocalAdminEnabled,
   }
 }
