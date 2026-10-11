@@ -25,6 +25,9 @@
   --text-muted:     #475569;
   --text-inverse:   #0f172a;
 
+  /* Gris boussole — polish / légèrement métallisé, harmonieux avec le bleu-gris */
+  --neutral-metal:  #94a3b8;
+
   /* Bordures */
   --border:         rgba(255, 255, 255, 0.08);
   --border-strong:  rgba(255, 255, 255, 0.15);
@@ -141,6 +144,8 @@
   --status-concept-bg:    rgba(100, 116, 139, 0.10);
   --status-upcoming:      #94a3b8;
   --status-upcoming-bg:   rgba(148, 163, 184, 0.08);
+
+  --neutral-metal:  #737f8d;
 
   --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
   --shadow-md:  0 4px 16px rgba(0,0,0,0.10);

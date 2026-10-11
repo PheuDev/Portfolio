@@ -140,12 +140,12 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card-hover));
-}
+  border: 1px solid var(--border);`n}
 
 .project-card__placeholder-letter {
   font-size: var(--font-size-5xl);
   font-weight: 800;
-  color: var(--border-strong);
+  color: var(--neutral-metal);
   line-height: 1;
   user-select: none;
 }

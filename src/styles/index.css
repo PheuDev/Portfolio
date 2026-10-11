@@ -192,3 +192,9 @@ input, textarea, select {
   h1 { font-size: var(--font-size-3xl); }
   h2 { font-size: var(--font-size-2xl); }
 }
+
+/* ── Ancres : compensation de la navbar fixe ─────────────────────────── */
+html {
+  scroll-padding-top: calc(var(--navbar-height) + 12px);
+}
+

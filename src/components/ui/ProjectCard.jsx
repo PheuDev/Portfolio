@@ -47,6 +47,7 @@ export function ProjectCard({ project, featured = false }) {
               src={image}
               alt={`Aperçu de ${project.name} - ${index + 1}`}
               loading="lazy"
+              decoding="async"
               className={`project-card__image ${index === currentImageIndex ? 'project-card__image--active' : ''}`}
             />
           ))
