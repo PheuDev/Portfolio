@@ -14,10 +14,28 @@
 
 .about-profile__main {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
+  grid-template-areas:
+    "text photo"
+    "traits photo";
   gap: var(--space-12);
   align-items: start;
   margin-bottom: var(--space-10);
+}
+
+.about-profile__text {
+  grid-area: text;
+}
+
+.about-profile__photo {
+  grid-area: photo;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 20%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
 }
 
 .about-profile__name {
@@ -61,8 +79,10 @@
 
 /* Traits */
 .about-profile__traits {
+  grid-area: traits;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: var(--space-3);
   flex-shrink: 0;
 }
@@ -414,6 +434,14 @@
 @media (max-width: 900px) {
   .about-profile__main {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "text"
+      "photo"
+      "traits";
+    gap: var(--space-8);
+  }
+  .about-profile__photo {
+    width: min(100%, 280px);
   }
   .about-profile__traits {
     flex-direction: row;

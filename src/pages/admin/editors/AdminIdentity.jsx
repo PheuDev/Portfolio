@@ -15,6 +15,21 @@ export function AdminIdentity() {
     setSaved(false)
   }
 
+  function handleSocialLinkChange(label, url) {
+    setForm(prev => {
+      const links = prev.links || []
+      const normalizedLabel = label.toLowerCase()
+      const exists = links.some(link => link.label.toLowerCase() === normalizedLabel)
+      return {
+        ...prev,
+        links: exists
+          ? links.map(link => link.label.toLowerCase() === normalizedLabel ? { ...link, url } : link)
+          : [...links, { label, url, icon: label.toLowerCase() }],
+      }
+    })
+    setSaved(false)
+  }
+
   function handleAvailabilityChange(field, value) {
     setForm(prev => ({
       ...prev,
@@ -72,11 +87,6 @@ export function AdminIdentity() {
             <input className="admin-form__input" value={form.title}
               onChange={e => handleChange('title', e.target.value)} />
           </div>
-          <div className="admin-form__group">
-            <label className="admin-form__label">Accroche courte</label>
-            <input className="admin-form__input" value={form.tagline}
-              onChange={e => handleChange('tagline', e.target.value)} />
-          </div>
         </div>
 
         {/* Bios */}
@@ -115,6 +125,22 @@ export function AdminIdentity() {
             <input className="admin-form__input" value={form.location}
               onChange={e => handleChange('location', e.target.value)} />
           </div>
+          <div className="admin-form__group">
+            <label className="admin-form__label">Téléphone / WhatsApp</label>
+            <input className="admin-form__input" type="tel" value={form.phone || ''}
+              onChange={e => handleChange('phone', e.target.value)} />
+            <span className="admin-form__sublabel">Indique le numéro au format international pour le lien WhatsApp.</span>
+          </div>
+          {['LinkedIn', 'GitHub'].map(label => (
+            <div className="admin-form__group" key={label}>
+              <label className="admin-form__label" htmlFor={`identity-link-${label.toLowerCase()}`}>{label}</label>
+              <input id={`identity-link-${label.toLowerCase()}`} className="admin-form__input"
+                type="url" autoComplete="url"
+                value={form.links?.find(link => link.label.toLowerCase() === label.toLowerCase())?.url || ''}
+                onChange={e => handleSocialLinkChange(label, e.target.value)}
+                placeholder={`https://${label.toLowerCase()}.com/…`} />
+            </div>
+          ))}
         </div>
 
         {/* Disponibilité */}

@@ -66,6 +66,10 @@
 
 /* Signature secondaire "Pheu" — subtile et élégante */
 .navbar__nickname {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: inherit;
   font-size: var(--font-size-sm);
   font-style: italic;
   font-weight: 400;
@@ -76,7 +80,6 @@
   transition:
     opacity var(--transition-fast),
     text-shadow var(--transition-fast);
-  /* Pas de cursor:pointer — c'est une signature, pas un bouton visible */
   user-select: none;
 }
 

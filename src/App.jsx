@@ -9,6 +9,7 @@
                       /admin/explorations  /admin/opportunites
    ============================================================ */
 
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useData } from '@/context/DataContext'
 
@@ -22,30 +23,37 @@ import { useTheme } from '@/hooks/useTheme'
 // Layout public
 import { Layout } from '@/components/layout/Layout'
 
-// Pages publiques
-import { Home }          from '@/pages/Home'
-import { Projects }      from '@/pages/Projects'
-import { ProjectDetail } from '@/pages/ProjectDetail'
-import { About }         from '@/pages/About'
-import { Services }      from '@/pages/Services'
-import { Explorations }  from '@/pages/Explorations'
-import { Contact }       from '@/pages/Contact'
+const lazyNamed = (loadModule, name) => lazy(() =>
+  loadModule().then(module => ({ default: module[name] }))
+)
 
-// Admin
-import { AdminRoute }       from '@/pages/admin/AdminRoute'
-import { AdminLayout }      from '@/pages/admin/AdminLayout'
-import { AdminDashboard }   from '@/pages/admin/AdminDashboard'
-import { AdminIdentity }    from '@/pages/admin/editors/AdminIdentity'
-import { AdminProjects }    from '@/pages/admin/editors/AdminProjects'
-import { AdminSkills }      from '@/pages/admin/editors/AdminSkills'
-import { AdminServices }    from '@/pages/admin/editors/AdminServices'
-import { AdminCredentials } from '@/pages/admin/editors/AdminCredentials'
-import { AdminExperience }  from '@/pages/admin/editors/AdminExperience'
-import { AdminExplorations} from '@/pages/admin/editors/AdminExplorations'
-import { AdminOpportunites} from '@/pages/admin/editors/AdminOpportunites'
+const Home = lazyNamed(() => import('@/pages/Home'), 'Home')
+const Projects = lazyNamed(() => import('@/pages/Projects'), 'Projects')
+const ProjectDetail = lazyNamed(() => import('@/pages/ProjectDetail'), 'ProjectDetail')
+const About = lazyNamed(() => import('@/pages/About'), 'About')
+const Services = lazyNamed(() => import('@/pages/Services'), 'Services')
+const Explorations = lazyNamed(() => import('@/pages/Explorations'), 'Explorations')
+const Contact = lazyNamed(() => import('@/pages/Contact'), 'Contact')
+const AdminRoute = lazyNamed(() => import('@/pages/admin/AdminRoute'), 'AdminRoute')
+const AdminLayout = lazyNamed(() => import('@/pages/admin/AdminLayout'), 'AdminLayout')
+const AdminDashboard = lazyNamed(() => import('@/pages/admin/AdminDashboard'), 'AdminDashboard')
+const AdminIdentity = lazyNamed(() => import('@/pages/admin/editors/AdminIdentity'), 'AdminIdentity')
+const AdminProjects = lazyNamed(() => import('@/pages/admin/editors/AdminProjects'), 'AdminProjects')
+const AdminSkills = lazyNamed(() => import('@/pages/admin/editors/AdminSkills'), 'AdminSkills')
+const AdminServices = lazyNamed(() => import('@/pages/admin/editors/AdminServices'), 'AdminServices')
+const AdminCredentials = lazyNamed(() => import('@/pages/admin/editors/AdminCredentials'), 'AdminCredentials')
+const AdminExperience = lazyNamed(() => import('@/pages/admin/editors/AdminExperience'), 'AdminExperience')
+const AdminExplorations = lazyNamed(() => import('@/pages/admin/editors/AdminExplorations'), 'AdminExplorations')
+const AdminOpportunites = lazyNamed(() => import('@/pages/admin/editors/AdminOpportunites'), 'AdminOpportunites')
+const NotFound = lazyNamed(() => import('@/pages/NotFound'), 'NotFound')
 
-// 404
-import { NotFound } from '@/pages/NotFound'
+function routeContent(element) {
+  return (
+    <Suspense fallback={<div className="route-loading" role="status">Chargement de la page…</div>}>
+      {element}
+    </Suspense>
+  )
+}
 
 /* Composant racine qui porte le thème et les providers */
 function AppContent() {
@@ -75,37 +83,37 @@ function AppContent() {
 
         {/* ── Routes publiques ── */}
         <Route element={<Layout theme={theme} onToggleTheme={toggleTheme} />}>
-          <Route index            element={<Home />}          />
-          <Route path="projets"   element={<Projects />}      />
-          <Route path="projets/:slug" element={<ProjectDetail />} />
-          <Route path="a-propos"  element={<About />}         />
-          <Route path="services"  element={<Services />}      />
-          <Route path="explorations" element={<Explorations />} />
-          <Route path="contact"   element={<Contact />}       />
+          <Route index            element={routeContent(<Home />)} />
+          <Route path="projets"   element={routeContent(<Projects />)} />
+          <Route path="projets/:slug" element={routeContent(<ProjectDetail />)} />
+          <Route path="a-propos"  element={routeContent(<About />)} />
+          <Route path="services"  element={routeContent(<Services />)} />
+          <Route path="explorations" element={routeContent(<Explorations />)} />
+          <Route path="contact"   element={routeContent(<Contact />)} />
         </Route>
 
         {/* ── Routes admin (protégées) ── */}
         <Route
           path="admin"
-          element={
+          element={routeContent(
             <AdminRoute>
               <AdminLayout />
             </AdminRoute>
-          }
+          )}
         >
-          <Route index                 element={<AdminDashboard />}   />
-          <Route path="identite"       element={<AdminIdentity />}    />
-          <Route path="projets"        element={<AdminProjects />}    />
-          <Route path="competences"    element={<AdminSkills />}      />
-          <Route path="services"       element={<AdminServices />}    />
-          <Route path="credentials"    element={<AdminCredentials />} />
-          <Route path="experience"     element={<AdminExperience />}  />
-          <Route path="explorations"   element={<AdminExplorations />}/>
-          <Route path="opportunites"   element={<AdminOpportunites />}/>
+          <Route index                 element={routeContent(<AdminDashboard />)} />
+          <Route path="identite"       element={routeContent(<AdminIdentity />)} />
+          <Route path="projets"        element={routeContent(<AdminProjects />)} />
+          <Route path="competences"    element={routeContent(<AdminSkills />)} />
+          <Route path="services"       element={routeContent(<AdminServices />)} />
+          <Route path="credentials"    element={routeContent(<AdminCredentials />)} />
+          <Route path="experience"     element={routeContent(<AdminExperience />)} />
+          <Route path="explorations"   element={routeContent(<AdminExplorations />)} />
+          <Route path="opportunites"   element={routeContent(<AdminOpportunites />)} />
         </Route>
 
         {/* ── 404 — toute URL non reconnue ── */}
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={routeContent(<NotFound />)} />
 
       </Routes>
     </BrowserRouter>

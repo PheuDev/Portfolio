@@ -67,6 +67,8 @@ export function About() {
               </div>
             </div>
 
+            <img className="about-profile__photo" src="/images/Pheu.jpg" alt="" />
+
             {/* Traits */}
             {identity.traits && identity.traits.length > 0 && (
               <div className="about-profile__traits">

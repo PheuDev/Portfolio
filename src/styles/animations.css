@@ -144,6 +144,13 @@
   }
 }
 
+@keyframes pageOut {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
 /* ── Désactivation pour prefers-reduced-motion ────────────── */
 
 @media (prefers-reduced-motion: reduce) {

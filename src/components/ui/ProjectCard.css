@@ -46,8 +46,8 @@
 
 .project-card:hover {
   border-color: var(--border-accent);
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-md), var(--shadow-accent);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .project-card:focus-visible {
@@ -140,7 +140,8 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card-hover));
-  border: 1px solid var(--border);`n}
+  border: 1px solid var(--border);
+}
 
 .project-card__placeholder-letter {
   font-size: var(--font-size-5xl);

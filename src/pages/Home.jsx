@@ -25,7 +25,7 @@ const HERO_WORDS = [
 
 export function Home() {
   useReveal()
-  useDocumentTitle('Accueil', 'Phanuel DAVODOUN — Développeur Web Full Stack. Conception et développement d\'applications web modernes, utiles et durables.')
+  useDocumentTitle('Accueil', 'Phanuel DAVODOUN — Développeur Web Full Stack.')
   const { identity, featuredProjects, skills } = useData()
 
   // Texte dynamique du hero
@@ -74,10 +74,6 @@ export function Home() {
                 {identity.nickname}
               </span>
             </h1>
-
-            <p className="hero__tagline animate-fade-in-up animate-delay-2">
-              {identity.tagline}
-            </p>
 
             <p className="hero__bio animate-fade-in-up animate-delay-3">
               {identity.shortBio}

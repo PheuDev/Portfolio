@@ -37,14 +37,6 @@
   opacity: 0.6;
 }
 
-.footer__tagline {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  line-height: 1.6;
-  max-width: 300px;
-  margin: 0;
-}
-
 /* ── Navigation ── */
 .footer__nav-title {
   font-size: var(--font-size-xs);
@@ -87,19 +79,32 @@
 
 .footer__socials {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .footer__social-link {
-  font-size: var(--font-size-sm);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
   color: var(--text-secondary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .footer__social-link:hover {
   color: var(--accent);
+  border-color: var(--border-accent);
+  background: var(--accent-dim);
+}
+
+.footer__social-link svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 /* ── Bottom ── */
@@ -126,13 +131,6 @@
 .footer__credit {
   font-style: italic;
   opacity: 0.5;
-}
-
-.footer__made-with {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  margin: 0;
-  opacity: 0.6;
 }
 
 /* ── Responsive ── */

@@ -10,18 +10,18 @@ export const identity = {
   fullName:  'Phanuel DAVODOUN',       // utilisé pour l'affichage principal
   nickname:  'Pheu',              // signature secondaire
 
-  // ── Titre et accroche ────────────────────────────────────
+  // ── Titre professionnel ─────────────────────────────────
   title:    'Développeur Web Full Stack',
-  tagline:  'Je conçois et développe des applications web modernes, utiles et durables.',
 
   // ── Présentation courte (hero, cartes) ───────────────────
-  shortBio: 'Je transforme des idées en solutions concrètes, en combinant rigueur technique et sens du produit.',
+  shortBio: 'Je pars d’un besoin concret, j’en clarifie les contraintes, puis je construis une application pensée pour être utilisée et faire évoluer.',
 
   // ── Présentation longue (page À propos) ─────────────────
-  longBio: `Je suis développeur web passionné par la création d'applications utiles, esthétiques et performantes.
-J'aime résoudre des problèmes, approcher de nouvelles technologies et transformer des idées en résultats concrets.
+  longBio: `Je m'appelle Phanuel. J'aime partir d'un besoin réel et comprendre ce qui le rend difficile avant de choisir une solution.
 
-Ce qui m'intéresse dans le développement, c'est la conception autant que l'implémentation : comprendre un problème avant de coder, choisir une architecture adaptée, construire quelque chose qui tient dans le temps.`,
+Sur KYN, mon projet personnel en cours, je travaille à représenter des liens familiaux et à rendre leur exploration claire. Ce travail m'amène à faire dialoguer modèle de données, architecture et interface.
+
+Je cherche à rejoindre une équipe où je peux contribuer à des applications web concrètes, apprendre au contact d'autres développeurs et livrer des fonctionnalités utiles. Je reste aussi ouvert aux projets clients, du cadrage à la réalisation.`,
 
   // ── Philosophie ──────────────────────────────────────────
   philosophy: `Un bon code n'est pas celui qui m'impressionne, mais celui qui se comprend, se maintient et sert un objectif.`,
@@ -30,15 +30,14 @@ Ce qui m'intéresse dans le développement, c'est la conception autant que l'imp
   location: 'Benin',
 
   // ── Contact ──────────────────────────────────────────────
-  email:    'eliedavodoun@gmail.com',   // à remplacer
+  email:    'eliedavodoun@gmail.com',
   phone:    '+229 01 66 51 70 39',                       // optionnel, laisser vide si non souhaité
 
   // ── Réseaux et liens ─────────────────────────────────────
   links: [
-    // Renseigne tes vraies URLs ci-dessous.
     // Laisser url: '' masque automatiquement le lien dans l'interface.
-    { label: 'GitHub',   url: '', icon: 'github'   },
-    { label: 'LinkedIn', url: '', icon: 'linkedin' },
+    { label: 'GitHub',   url: 'https://github.com/PheuDev', icon: 'github'   },
+    { label: 'LinkedIn', url: 'https://www.linkedin.com/in/elie-davodoun-96a548340/?isSelfProfile=true', icon: 'linkedin' },
     // Ajoute d'autres liens ici (Twitter/X, portfolio alternatif, etc.)
   ],
 

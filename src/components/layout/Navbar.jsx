@@ -69,6 +69,13 @@ export function Navbar({ theme, onToggleTheme, onAdminAccess }) {
     e.preventDefault()
     e.stopPropagation()
 
+    if (e.detail === 0) {
+      pheuClicks.current = 0
+      clearTimeout(pheuTimer.current)
+      onAdminAccess?.()
+      return
+    }
+
     pheuClicks.current += 1
     clearTimeout(pheuTimer.current)
 
@@ -93,14 +100,14 @@ export function Navbar({ theme, onToggleTheme, onAdminAccess }) {
               <span className="navbar__name">{identity.fullName}</span>
             </Link>
             {/* Signature "Pheu" — aussi point d'accès admin (easter egg discret) */}
-            <span
+            <button
+              type="button"
               className="navbar__nickname"
               onClick={handlePheuClick}
-              aria-hidden="true"   /* Invisible aux lecteurs d'écran — c'est une signature */
-              tabIndex={-1}
+              aria-label="Ouvrir l’accès à l’administration"
             >
               {identity.nickname}
-            </span>
+            </button>
           </div>
 
           {/* ── Groupe navigation et actions ── */}

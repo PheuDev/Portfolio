@@ -34,7 +34,7 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.12;
+  opacity: 0.08;
 }
 
 .hero__glow--1 {
@@ -57,12 +57,12 @@
 /* Déplacement lent et subtil des halos */
 @keyframes heroGlowA {
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(-40px, 34px, 0) scale(1.1); }
+  to   { transform: translate3d(-24px, 20px, 0) scale(1.05); }
 }
 
 @keyframes heroGlowB {
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(36px, -28px, 0) scale(1.12); }
+  to   { transform: translate3d(20px, -16px, 0) scale(1.06); }
 }
 
 .hero__glow--1 { animation: heroGlowA 16s ease-in-out infinite alternate; }
@@ -156,14 +156,6 @@
   opacity: 0.7;
   margin-top: var(--space-1);
   letter-spacing: 0;
-}
-
-.hero__tagline {
-  font-size: var(--font-size-xl);
-  font-weight: 500;
-  color: var(--text-primary);
-  line-height: 1.4;
-  margin: 0;
 }
 
 .hero__bio {
