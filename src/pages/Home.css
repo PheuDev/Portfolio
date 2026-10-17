@@ -16,20 +16,6 @@
   overflow: hidden;
 }
 
-/* Grille technique subtile en fond du hero */
-.hero__bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 54px 54px;
-  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 38%, #000 25%, transparent 75%);
-  mask-image: radial-gradient(ellipse 75% 65% at 50% 38%, #000 25%, transparent 75%);
-  opacity: 0.4;
-}
-
 .hero__glow {
   position: absolute;
   border-radius: 50%;
