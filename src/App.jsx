@@ -22,18 +22,19 @@ import { useTheme } from '@/hooks/useTheme'
 
 // Layout public
 import { Layout } from '@/components/layout/Layout'
+import { Home } from '@/pages/Home'
+import { Projects } from '@/pages/Projects'
+import { ProjectDetail } from '@/pages/ProjectDetail'
+import { About } from '@/pages/About'
+import { Services } from '@/pages/Services'
+import { Explorations } from '@/pages/Explorations'
+import { Contact } from '@/pages/Contact'
+import { NotFound } from '@/pages/NotFound'
 
 const lazyNamed = (loadModule, name) => lazy(() =>
   loadModule().then(module => ({ default: module[name] }))
 )
 
-const Home = lazyNamed(() => import('@/pages/Home'), 'Home')
-const Projects = lazyNamed(() => import('@/pages/Projects'), 'Projects')
-const ProjectDetail = lazyNamed(() => import('@/pages/ProjectDetail'), 'ProjectDetail')
-const About = lazyNamed(() => import('@/pages/About'), 'About')
-const Services = lazyNamed(() => import('@/pages/Services'), 'Services')
-const Explorations = lazyNamed(() => import('@/pages/Explorations'), 'Explorations')
-const Contact = lazyNamed(() => import('@/pages/Contact'), 'Contact')
 const AdminRoute = lazyNamed(() => import('@/pages/admin/AdminRoute'), 'AdminRoute')
 const AdminLayout = lazyNamed(() => import('@/pages/admin/AdminLayout'), 'AdminLayout')
 const AdminDashboard = lazyNamed(() => import('@/pages/admin/AdminDashboard'), 'AdminDashboard')
@@ -45,7 +46,6 @@ const AdminCredentials = lazyNamed(() => import('@/pages/admin/editors/AdminCred
 const AdminExperience = lazyNamed(() => import('@/pages/admin/editors/AdminExperience'), 'AdminExperience')
 const AdminExplorations = lazyNamed(() => import('@/pages/admin/editors/AdminExplorations'), 'AdminExplorations')
 const AdminOpportunites = lazyNamed(() => import('@/pages/admin/editors/AdminOpportunites'), 'AdminOpportunites')
-const NotFound = lazyNamed(() => import('@/pages/NotFound'), 'NotFound')
 
 function routeContent(element) {
   return (
@@ -83,13 +83,13 @@ function AppContent() {
 
         {/* ── Routes publiques ── */}
         <Route element={<Layout theme={theme} onToggleTheme={toggleTheme} />}>
-          <Route index            element={routeContent(<Home />)} />
-          <Route path="projets"   element={routeContent(<Projects />)} />
-          <Route path="projets/:slug" element={routeContent(<ProjectDetail />)} />
-          <Route path="a-propos"  element={routeContent(<About />)} />
-          <Route path="services"  element={routeContent(<Services />)} />
-          <Route path="explorations" element={routeContent(<Explorations />)} />
-          <Route path="contact"   element={routeContent(<Contact />)} />
+          <Route index            element={<Home />} />
+          <Route path="projets"   element={<Projects />} />
+          <Route path="projets/:slug" element={<ProjectDetail />} />
+          <Route path="a-propos"  element={<About />} />
+          <Route path="services"  element={<Services />} />
+          <Route path="explorations" element={<Explorations />} />
+          <Route path="contact"   element={<Contact />} />
         </Route>
 
         {/* ── Routes admin (protégées) ── */}
@@ -113,7 +113,7 @@ function AppContent() {
         </Route>
 
         {/* ── 404 — toute URL non reconnue ── */}
-        <Route path="*" element={routeContent(<NotFound />)} />
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
     </BrowserRouter>
